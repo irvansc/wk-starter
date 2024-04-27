@@ -28,18 +28,19 @@
             </li>
             @if (auth()->user() && auth()->user()->roles->pluck('name')->intersect(['admin', 'it'])->isNotEmpty())
 
-            <li class="{{ Route::is('konfigurasi.*') ? 'active open' : '' }}">
+            <li class="{{ Route::is('konfigurasi.*') ? 'active open' : '' }} || {{ request()->segment(1) == 'users' ? 'active' : '' }} ">
                 <a href="#" class="main-menu has-dropdown ">
                     <i class="ti-desktop"></i>
                     <span>KONFIRGURASI</span>
                 </a>
-                <ul class="sub-menu {{ Route::is('konfigurasi.*') ? 'expand' : '' }}">
+                <ul class="sub-menu {{ Route::is('konfigurasi.*') ? 'expand' : '' }} || {{ request()->segment(1) == 'users' ? 'active' : '' }}">
                     <li class="{{ Route::is('konfigurasi.roles.index') ? 'active' : '' }}"><a href="{{ route('konfigurasi.roles.index') }}" class="link"><span>Roles</span></a></li>
                     <li class="{{ Route::is('konfigurasi.permissions.index') ? 'active' : '' }}"><a href="{{ route('konfigurasi.permissions.index') }}" class="link"><span>Permission</span></a></li>
+                    <li class="{{ Route::is('users.index') ? 'active' : '' }}"><a href="{{ route('users.index') }}" class="link"><span>Users</span></a></li>
                 </ul>
             </li>
-            @endif
 
+            @endif
 
         </ul>
     </div>

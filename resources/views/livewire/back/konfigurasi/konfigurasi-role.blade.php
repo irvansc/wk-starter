@@ -8,7 +8,10 @@
                         <i class="ti-plus"></i>
                         Tambah Data
                     </button>
-            </div>
+                </div>
+                <div class="col-md-4 float-left mb-2">
+                    <input type="text" class="form-control" placeholder="Cari role..." wire:model.debounce.300ms="searchRole">
+                </div>
         </div>
     </div>
     <div class="row">

@@ -24,17 +24,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-// Route::middleware('auth')->group(function () {
-
-//     Route::resource('konfigurasi/roles', RoleController::class);
-//     Route::resource('konfigurasi/permissions', PermissionController::class);
-// });
 
 Route::middleware('auth')->group(function(){
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('users', UserController::class);
+    Route::post('/change-profile-picture', [UserController::class, 'changeProfilePicture'])->name('change-profile-picture');
+
         Route::prefix('konfigurasi')->name('konfigurasi.')->group(function(){
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);

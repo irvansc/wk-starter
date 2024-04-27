@@ -15,4 +15,13 @@ class UserProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getPictureAttribute($value)
+    {
+       if ($value) {
+        return asset('/back/img/user/'.$value);
+       }else {
+        return asset('/back/img/user/person.png');
+       }
+    }
 }

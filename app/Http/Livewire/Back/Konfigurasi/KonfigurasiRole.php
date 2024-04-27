@@ -10,7 +10,7 @@ class KonfigurasiRole extends Component
     public $name, $guard_name;
     public $selected_role_id;
     public $updateRoleMode = false;
-
+    public $searchRole = '';
     public $listeners = [
         'resetModalForm',
         'deleteRoleAction',
@@ -91,9 +91,15 @@ class KonfigurasiRole extends Component
         flash()->addInfo('Role has been successfuly deleted.');
     }
     public function render()
-    {
-        return view('livewire.back.konfigurasi.konfigurasi-role', [
-            'roles' => Role::orderBy('created_at', 'asc')->get(),
-        ]);
-    }
+{
+    $roles = Role::when($this->searchRole, function ($query) {
+        $query->where('name', 'like', '%' . $this->searchRole . '%');
+    })
+    ->orderBy('created_at', 'asc')
+    ->get();
+
+    return view('livewire.back.konfigurasi.konfigurasi-role', [
+        'roles' => $roles,
+    ]);
+}
 }
