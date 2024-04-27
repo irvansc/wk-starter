@@ -116,12 +116,13 @@
     <script src="/back/dist/vendor/ijabo/ijabo.min.js"></script>
     <script src="/back/dist/vendor/ijaboCropTool/ijaboCropTool.min.js"></script>
     <script src="/back/dist/vendor/ijaboViewer/jquery.ijaboViewer.min.js"></script>
+    <script src="/back/dist/vendor/sweetalert2/sweetalert2.all.min.js"></script>
     @stack('scripts')
     @livewireScripts()
     <script src="/back/dist/assets/js/pages/element-ui.min.js"></script>
     <!-- js for this page only -->
     <script src="/back/dist/vendor/chart.js/Chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> --}}
     <script src="/back/dist/assets/js/pages/index.min.js"></script>
     <!-- ======= -->
     <script src="/back/dist/assets/js/main.min.js"></script>

@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function(){
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('users', UserController::class);
     Route::post('/change-profile-picture', [UserController::class, 'changeProfilePicture'])->name('change-profile-picture');
-
+    Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('logs');
         Route::prefix('konfigurasi')->name('konfigurasi.')->group(function(){
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);

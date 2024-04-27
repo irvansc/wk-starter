@@ -6,9 +6,9 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Setting;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Nette\Utils\Random;
 use Illuminate\Support\Str;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -22,13 +22,25 @@ class KonfigurasiUsers extends Component
     public $roleFilter = '';
     public $perPage = 10;
     public $selected_user_id;
-    public $name, $email, $username,$role;
+    public $name, $email, $username, $role;
+
+    public $checkedUser = [];
+    public $selectAll = false;
+    public ?int $selectedUser = null;
     protected $listeners = [
         'resetInputFields',
-        'deleteAuthorAction',
-        'deleteCheckedAuthor'
+        'deleteUserAction',
+        'deleteCheckedUser'
     ];
+    public function updatedSelectAll($value)
+    {
 
+        if ($value == 1) {
+            $this->checkedUser = User::pluck('id')->toArray();
+        } else {
+            $this->checkedUser = [];
+        }
+    }
     public function mount()
     {
         $this->resetPage();
@@ -97,12 +109,12 @@ class KonfigurasiUsers extends Component
                 $author_email = $this->email;
                 $author_name = $this->name;
 
-            $webs = Setting::all();
-            foreach ($webs as $web) {
-                $web_e = $web ? $web->web_email_noreply : 'default@example.com';
-                $web_n = $web ? $web->web_name : 'Default Web Name';
-            }
-                Mail::send('new-user-email-template', $data, function ($message) use ($web_e, $web_n, $data, $author_email, $author_name    ) {
+                $webs = Setting::all();
+                foreach ($webs as $web) {
+                    $web_e = $web ? $web->web_email_noreply : 'default@example.com';
+                    $web_n = $web ? $web->web_name : 'Default Web Name';
+                }
+                Mail::send('new-user-email-template', $data, function ($message) use ($web_e, $web_n, $data, $author_email, $author_name) {
                     $message->from($web_e, $web_n);
                     $message->to($author_email, $author_name)
                         ->subject('Account creation.');
@@ -145,43 +157,83 @@ class KonfigurasiUsers extends Component
     }
 
     public function updateUser()
-{
-    $this->validate([
-        'selected_user_id' => 'required',
-        'name' => 'required',
-        'email' => 'required|email|unique:users,email,' . $this->selected_user_id,
-        'username' => 'required|unique:users,username,' . $this->selected_user_id,
-        'role' => 'required',
-    ]);
+    {
+        $this->validate([
+            'selected_user_id' => 'required',
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $this->selected_user_id,
+            'username' => 'required|unique:users,username,' . $this->selected_user_id,
+            'role' => 'required',
+        ]);
 
-    try {
-        $user = User::find($this->selected_user_id);
-        if ($user) {
-            $user->update([
-                'name' => $this->name,
-                'email' => $this->email,
-                'username' => $this->username,
-            ]);
+        try {
+            $user = User::find($this->selected_user_id);
+            if ($user) {
+                $user->update([
+                    'name' => $this->name,
+                    'email' => $this->email,
+                    'username' => $this->username,
+                ]);
 
-            $user->syncRoles($this->role);
-            flash()->addSuccess('User has been successfully updated.');
+                $user->syncRoles($this->role);
+                flash()->addSuccess('User has been successfully updated.');
 
-            $this->dispatchBrowserEvent('hide_edit_user_modal');
-            $this->resetInputFields();
+                $this->dispatchBrowserEvent('hide_edit_user_modal');
+                $this->resetInputFields();
+            }
+        } catch (\Exception $e) {
+            $this->addError('updateError', 'Error updating user: ' . $e->getMessage());
         }
-    } catch (\Exception $e) {
-        $this->addError('updateError', 'Error updating user: ' . $e->getMessage());
     }
-}
 
-public function deleteUser($user)
-{
-    $this->dispatchBrowserEvent('deleteUser', [
-        'title' => 'Apakah anda yakin?',
-        'html' => 'Data yang di hapus tidak dapat dikembalikan! dengan nama user: <br>' . $user['name'] . '<br>',
-        'id' => $user['id']
-    ]);
-}
+    public function deleteUser($user)
+    {
+        $this->dispatchBrowserEvent('deleteUser', [
+            'title' => 'Apakah anda yakin?',
+            'html' => 'Data yang di hapus tidak dapat dikembalikan! dengan nama user: <br>' . $user['name'] . '<br>',
+            'id' => $user['id']
+        ]);
+    }
+    public function deleteUserAction($id)
+    {
+
+        $user = User::find($id);
+        if ($user->id == 1) {
+            flash()->addError('User cannot be deleted.');
+            return;
+        }
+
+        $user->delete();
+        Log::info("User with ID $id has been successfully deleted.");
+        flash()->addSuccess('User has been successfully deleted.');
+    }
+    public function deleteSelectedUser()
+    {
+        $this->dispatchBrowserEvent('swal:deleteUser', [
+            'title' => 'Are you sure?',
+            'html' => 'You want to delete this All User',
+            'checkedIDs' => $this->checkedUser,
+        ]);
+    }
+
+    public function deleteCheckedUser($ids)
+    {
+        $filteredIds = array_filter($ids, function ($id) {
+            return $id != 1;
+        });
+
+        if (!empty($filteredIds)) {
+            $users = User::whereIn('id', $filteredIds)->get();
+            foreach ($users as $user) {
+                $user->delete();
+            }
+            flash()->addSuccess('User has been successfully deleted!');
+        } else {
+            flash()->addError('User cannot be deleted.');
+        }
+
+        $this->checkedUser = [];
+    }
     public function render()
     {
         $query = User::query()

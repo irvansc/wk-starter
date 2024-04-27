@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\File;
 class UserController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('can:create role');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('can:create role');
+    // }
     /**
      * Display a listing of the resource.
      */
